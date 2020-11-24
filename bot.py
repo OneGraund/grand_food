@@ -246,20 +246,58 @@ def callback_bank_inline_query(call):
 			if config.USER_ORDER!=None:
 				productAction = searchProductByMessageId(config.PRODUCTS,call.message.message_id)
 				config.USER_ORDER.remove_from_cart(productAction.product_id)
+
+				for elem in config.USER_ORDER.cart:
+					if elem[0][1]==productAction.product_name:
+						amountInOrder=elem[1]
+						print(f'Got result !\nTried - {elem} and {productAction.product_name}')
+					else:
+						print(f'Error - cant find this message\nTried - {elem} and {productAction.product_name}')
+				markup = types.InlineKeyboardMarkup(row_width=3)
+				item1=types.InlineKeyboardButton("🔻", callback_data='less')
+				item2=types.InlineKeyboardButton(f'{amountInOrder} шт.',callback_data='nothing') 
+				item3=types.InlineKeyboardButton("🔺", callback_data='more')
+				markup.add(item1, item2, item3)
+				
+				bot.edit_message_reply_markup(
+					chat_id=call.message.chat.id,
+					message_id=productAction.sentMessageId,
+					reply_markup=markup
+					)
+				
 				bot.edit_message_text(chat_id=call.message.chat.id, 
-				message_id=config.BOT_ORDER_MESSAGE.message_id, 
-				text=config.ORDER_MESSAGE(
-					cart_price=config.USER_ORDER.get_cart_price(),
-					products_in_cart=config.USER_ORDER.cart
-					),
-				reply_markup=config.ORDER_MESSAGE_MARKUP,
-				parse_mode='html'
+					message_id=config.BOT_ORDER_MESSAGE.message_id, 
+					text=config.ORDER_MESSAGE(
+						cart_price=config.USER_ORDER.get_cart_price(),
+						products_in_cart=config.USER_ORDER.cart
+						),
+					reply_markup=config.ORDER_MESSAGE_MARKUP,
+					parse_mode='html'
 				)
 
 		elif call.data == 'more':
 			if config.USER_ORDER!=None:
 				productAction = searchProductByMessageId(config.PRODUCTS,call.message.message_id)
 				config.USER_ORDER.add_to_cart(productAction.product_id)
+
+				for elem in config.USER_ORDER.cart:
+					if elem[0][1]==productAction.product_name:
+						amountInOrder=elem[1]
+						print(f'Got result !\nTried - {elem} and {productAction.product_name}')
+					else:
+						print(f'Error - cant find this message\nTried - {elem} and {productAction.product_name}')
+				markup = types.InlineKeyboardMarkup(row_width=3)
+				item1=types.InlineKeyboardButton("🔻", callback_data='less')
+				item2=types.InlineKeyboardButton(f'{amountInOrder} шт.',callback_data='nothing') 
+				item3=types.InlineKeyboardButton("🔺", callback_data='more')
+				markup.add(item1, item2, item3)
+				
+				bot.edit_message_reply_markup(
+					chat_id=call.message.chat.id,
+					message_id=productAction.sentMessageId,
+					reply_markup=markup
+					)
+
 				bot.edit_message_text(chat_id=call.message.chat.id, 
 				message_id=config.BOT_ORDER_MESSAGE.message_id, 
 				text=config.ORDER_MESSAGE(
