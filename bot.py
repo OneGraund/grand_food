@@ -4,6 +4,7 @@ import config
 import random
 import sqlite3
 import products
+import secret_token
 
 from telebot import types
 #from db_manipulator import User, get_users_from_db, get_user_by_id
@@ -12,7 +13,7 @@ import db_manipulator
 
 
 #----------------START-UP-----------
-bot = telebot.TeleBot(config.TOKEN)
+bot = telebot.TeleBot(secret_token.TOKEN)
 #-----------------------------------
 
 #---------------------USER-registration-------------------
@@ -211,6 +212,39 @@ def text_message_func(message):
 def callback_bank_inline_query(call):
 	#try:
 	if call.message:
+		#----PRODUCT-BUUTONS-ON-INLINE-KEYBOARD-HANDLER-------
+		def inline_keyboard_products_action(status):
+			if config.USER_ORDER!=None:
+				productAction = searchProductByMessageId(config.PRODUCTS,call.message.message_id)
+				
+				if status=='less':
+					config.USER_ORDER.remove_from_cart(productAction.product_id)
+				elif status=='more':
+					config.USER_ORDER.add_to_cart(productAction.product_id)
+
+				for elem in config.USER_ORDER.cart:
+					if elem[0][1]==productAction.product_name:
+						amountInOrder=elem[1]
+				
+				bot.edit_message_reply_markup(
+					chat_id=call.message.chat.id,
+					message_id=productAction.sentMessageId,
+					reply_markup=types.InlineKeyboardMarkup(row_width=3).add(
+							types.InlineKeyboardButton("🔻", callback_data='less'),
+							types.InlineKeyboardButton(f'{amountInOrder} шт.',callback_data='nothing'),
+							types.InlineKeyboardButton("🔺", callback_data='more')
+						)
+					)
+				
+				bot.edit_message_text(chat_id=call.message.chat.id, 
+					message_id=config.BOT_ORDER_MESSAGE.message_id, 
+					text=config.ORDER_MESSAGE(
+						cart_price=config.USER_ORDER.get_cart_price(),
+						products_in_cart=config.USER_ORDER.cart
+						),
+					reply_markup=config.ORDER_MESSAGE_MARKUP,
+					parse_mode='html'
+				)
 		#print("Callback request")
 		#------------------------Money-perevod------------
 		if call.data == 'good':
@@ -241,86 +275,27 @@ def callback_bank_inline_query(call):
 				show_alert=False,
 				text="Вы выбрали отображение средств")
 		#--------------------------------------------------
-		#-------------------Product-staff------------------
+		#-------------------Product-staff------------------		
 		elif call.data == 'less':
-			if config.USER_ORDER!=None:
-				productAction = searchProductByMessageId(config.PRODUCTS,call.message.message_id)
-				config.USER_ORDER.remove_from_cart(productAction.product_id)
-
-				for elem in config.USER_ORDER.cart:
-					if elem[0][1]==productAction.product_name:
-						amountInOrder=elem[1]
-						print(f'Got result !\nTried - {elem} and {productAction.product_name}')
-					else:
-						print(f'Error - cant find this message\nTried - {elem} and {productAction.product_name}')
-				markup = types.InlineKeyboardMarkup(row_width=3)
-				item1=types.InlineKeyboardButton("🔻", callback_data='less')
-				item2=types.InlineKeyboardButton(f'{amountInOrder} шт.',callback_data='nothing') 
-				item3=types.InlineKeyboardButton("🔺", callback_data='more')
-				markup.add(item1, item2, item3)
-				
-				bot.edit_message_reply_markup(
-					chat_id=call.message.chat.id,
-					message_id=productAction.sentMessageId,
-					reply_markup=markup
-					)
-				
-				bot.edit_message_text(chat_id=call.message.chat.id, 
-					message_id=config.BOT_ORDER_MESSAGE.message_id, 
-					text=config.ORDER_MESSAGE(
-						cart_price=config.USER_ORDER.get_cart_price(),
-						products_in_cart=config.USER_ORDER.cart
-						),
-					reply_markup=config.ORDER_MESSAGE_MARKUP,
-					parse_mode='html'
-				)
+			inline_keyboard_products_action('less')
 
 		elif call.data == 'more':
-			if config.USER_ORDER!=None:
-				productAction = searchProductByMessageId(config.PRODUCTS,call.message.message_id)
-				config.USER_ORDER.add_to_cart(productAction.product_id)
-
-				for elem in config.USER_ORDER.cart:
-					if elem[0][1]==productAction.product_name:
-						amountInOrder=elem[1]
-						print(f'Got result !\nTried - {elem} and {productAction.product_name}')
-					else:
-						print(f'Error - cant find this message\nTried - {elem} and {productAction.product_name}')
-				markup = types.InlineKeyboardMarkup(row_width=3)
-				item1=types.InlineKeyboardButton("🔻", callback_data='less')
-				item2=types.InlineKeyboardButton(f'{amountInOrder} шт.',callback_data='nothing') 
-				item3=types.InlineKeyboardButton("🔺", callback_data='more')
-				markup.add(item1, item2, item3)
-				
-				bot.edit_message_reply_markup(
-					chat_id=call.message.chat.id,
-					message_id=productAction.sentMessageId,
-					reply_markup=markup
-					)
-
-				bot.edit_message_text(chat_id=call.message.chat.id, 
-				message_id=config.BOT_ORDER_MESSAGE.message_id, 
-				text=config.ORDER_MESSAGE(
-					cart_price=config.USER_ORDER.get_cart_price(),
-					products_in_cart=config.USER_ORDER.cart
-					),
-				reply_markup=config.ORDER_MESSAGE_MARKUP,
-				parse_mode='html'
-				)
+			inline_keyboard_products_action('more')
 
 		elif call.data == 'cancel_order':
-			bot.edit_message_text(chat_id=call.message.chat.id, 
-				message_id=config.BOT_ORDER_MESSAGE.message_id, 
+			bot.send_message(chat_id=call.message.chat.id, 				#bot.edit_message
+				#message_id=config.BOT_ORDER_MESSAGE.message_id, 
 				text=config.ORDER_CANCELLED_MESSAGE,
 				reply_markup=None
 				)
+			delete_shop_UI(call.message.chat.id)
 			config.USER_ORDER.clear_cart()
 
 		elif call.data == 'confirm_order':
 			db = sqlite3.connect('server.db')
 			sql= db.cursor()
 			if config.USER_ORDER.confirm_order(sql,database=db)!='ERROR - NOT ENOUGH MONEY':
-				bot.send_message(call.message.chat.id, config.ORDER_CONFIRMED_MESSAGE ,parse_mode='html')
+				bot.send_message(call.message.chat.id, config.ORDER_CONFIRMED_MESSAGE(cart=config.USER_ORDER.cart, user_money=db_manipulator.get_user_cash_by_id(call.message.from_user.id, sql)) ,parse_mode='html')
 				bot.edit_message_text(chat_id=call.message.chat.id, 
 					message_id=config.BOT_ORDER_MESSAGE.message_id, 
 					text=config.ORDER_MESSAGE(
@@ -339,6 +314,7 @@ def callback_bank_inline_query(call):
 						),
 					parse_mode='html'
 					)
+			delete_shop_UI(call.message.chat.id)
 			config.USER_ORDER.clear_cart()
 		#------------------------------------------------
 	#except Exception as e:

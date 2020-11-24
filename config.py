@@ -84,7 +84,15 @@ BOT_ORDER_MESSAGE=None
 
 ORDER_MESSAGE_MARKUP=None
 
-ORDER_CONFIRMED_MESSAGE='Твой заказ принят и уже пакуется в <b>зале хореографии</b>. Ожидай его там). Приятного аппетита !'
+def ORDER_CONFIRMED_MESSAGE(cart, user_money):
+	string = f'Твой заказ принят и уже пакуется в <b>зале хореографии</b>. Ожидай его там). Приятного аппетита !\n\n<b>Твой заказ:</b>\n'
+	for elem in cart:
+		if elem[1]!=0:
+			string = string + f'{elem[0][1]} - {elem[1]} шт.\n'
+	string = f'{string}Остаток - <b>💵{user_money} грандиков💵</b>'
+	return string
+
+
 ORDER_CANCELLED_MESSAGE='Заказ отменён, корзина очищена'
 
 def ORDER_NOT_ENOUGH_MONEY(user_cash_amount, cart_cash_amount):
