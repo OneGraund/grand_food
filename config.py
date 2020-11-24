@@ -5,7 +5,7 @@ TOKEN = '1436100647:AAH5IYyT5sw9JRQYrUo7WoLG70mOECDiQGg' #My token
 GREETINGS_STICKER = 'static/welcome.webp'
 #-------REPLY-KEYBOARD--------
 ITEM1 = "🛒 Магазин 🛒"
-ITEM2 = "👤 Личный Кабинет 👤"
+ITEM2 = "👤Личный Кабинет👤"
 #---------INLINE-KEYBOARD-----
 ITEM1_INLINE='➡️Перевод➡️'
 ITEM2_INLINE='💰Средства💰'

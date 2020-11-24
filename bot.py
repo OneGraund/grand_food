@@ -17,15 +17,15 @@ bot = telebot.TeleBot(config.TOKEN)
 
 #---------------------USER-registration-------------------
 def register_user(message):
-	print("Start func init. Registration? ...")
+	#print("Start func init. Registration? ...")
 	db = sqlite3.connect('server.db')
 	sql= db.cursor()
 	if db_manipulator.get_user_by_id(int(message.from_user.id), sql_cursor=sql) == None:
-		print(f"User - {message.from_user.id} is not in DB. Adding...")
+		#print(f"User - {message.from_user.id} is not in DB. Adding...")
 		db_manipulator.User(message.from_user.id,message.from_user.first_name, 
 			message.from_user.last_name, message.from_user.username, 0).write_user_to_db(sql_cursor=sql, db=db)
 	else:
-		print(f"User - {message.from_user.id} is in DB. Continuing...")
+		#print(f"User - {message.from_user.id} is in DB. Continuing...")
 		return
 #---------------------------------------------------------
 
@@ -105,7 +105,8 @@ def delete_shop_UI(chat_id):
 			bot.delete_message(chat_id, elem.sentMessageId)
 		bot.delete_message(chat_id, config.BOT_ORDER_MESSAGE.message_id)
 	except Exception as e:
-		print(f"An error occurred - {e}. You shop UI is was probably not triggered yet.")
+		pass
+		#print(f"An error occurred - {e}. You shop UI is was probably not triggered yet.")
 #--------------------Text-reaction--------------------------
 @bot.message_handler(content_types=['text'])
 def text_message_func(message):
@@ -124,7 +125,7 @@ def text_message_func(message):
 
 			for elem in config.PRODUCTS:
 				elem.sendMessage(message)
-				elem.__str__()
+				#elem.__str__()
 
 			markup = types.InlineKeyboardMarkup(row_width=2)
 			item1=types.InlineKeyboardButton("❌Отменить заказ❌", callback_data='cancel_order')
@@ -210,11 +211,11 @@ def text_message_func(message):
 def callback_bank_inline_query(call):
 	#try:
 	if call.message:
-		print("Callback request")
+		#print("Callback request")
 		#------------------------Money-perevod------------
 		if call.data == 'good':
 			config.LAST_SENT_MESSAGE=None
-			print("CALLBACK ACTION: Money transaction")
+			#print("CALLBACK ACTION: Money transaction")
 			config.LAST_SENT_MESSAGE=bot.send_message(call.message.chat.id, config.MONEY_TRANSACTION, parse_mode='html')
 			bot.edit_message_text(chat_id=call.message.chat.id, 
 				message_id=call.message.message_id, text=config.bank_message(call.from_user.id),
@@ -226,7 +227,7 @@ def callback_bank_inline_query(call):
 		#-------------------Show-amount-of-money----------
 		elif call.data == 'bad' :
 			config.LAST_SENT_MESSAGE=None
-			print("CALLBACK ACTION: Show amount of money")
+			#print("CALLBACK ACTION: Show amount of money")
 			db = sqlite3.connect('server.db')
 			sql= db.cursor()
 			bot.send_message(call.message.chat.id, config.SHOW_USER_DATA(

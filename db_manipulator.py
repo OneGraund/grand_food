@@ -33,7 +33,8 @@ def get_users_from_db():
 	for value in sql.execute("SELECT * FROM users"):
 		lines.append(value)
 	for elem in lines:
-		print(f"{elem[1]}-{type(elem)}")
+		pass
+		#print(f"{elem[1]}-{type(elem)}")
 
 def get_user_by_id(idFromDB, sql_cursor):
 	lines = []
@@ -41,7 +42,7 @@ def get_user_by_id(idFromDB, sql_cursor):
 		lines.append(value)
 	for elem in lines:
 		if elem[0]==idFromDB:
-			print(f"I have been lookinf for a user with ID - {elem[0]} and found out that he has {elem[4]} cash")
+			#print(f"I have been lookinf for a user with ID - {elem[0]} and found out that he has {elem[4]} cash")
 			return elem
 	return None
 
@@ -92,7 +93,7 @@ class Order(object):
 	def get_cart_price(self):
 		price=0
 		for elem in self.cart:
-			print(elem)
+			#print(elem)
 			if elem[1]!=0:
 				price = price + (elem[0][3]*elem[1])
 		return price
