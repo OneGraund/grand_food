@@ -97,9 +97,9 @@ class Order(object):
 				price = price + (elem[0][3]*elem[1])
 		return price
 
-	def confirm_order(self,sql_order):
+	def confirm_order(self,sql_order,database):
 		if get_user_cash_by_id(sql=sql_order,idForScan=self.user_id)>=self.get_cart_price(): #ERROR RIGHT HERE
-			user_info=get_user_by_id(idFromDB=self.user_id, sql_cursor_for_id=sql_order)
+			user_info=get_user_by_id(idFromDB=self.user_id, sql_cursor=sql_order)
 			self.status='confirmed'
 			print("-"*50)
 			print(f"""Order was confirmed by:
@@ -108,8 +108,8 @@ Username - {user_info[3]}\n{"-  "*17}\nPlease, start packing this order:""")
 			for elem in self.cart:
 				if elem[1]!=0:
 					print(f"{elem[0][1]} - quantity:{elem[1]} ")
-			sql_order.execute(f"UPDATE users SET cash = {get_user_cash_by_id(self.user_id, sql)-self.get_cart_price()} WHERE user_id = {self.user_id}")
-			db.commit()
+			sql_order.execute(f"UPDATE users SET cash = {user_info[4]-self.get_cart_price()} WHERE user_id = {self.user_id}")
+			database.commit()
 		else:
 			return 'ERROR - NOT ENOUGH MONEY'
 

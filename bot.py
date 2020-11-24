@@ -280,17 +280,26 @@ def callback_bank_inline_query(call):
 		elif call.data == 'confirm_order':
 			db = sqlite3.connect('server.db')
 			sql= db.cursor()
-			config.USER_ORDER.confirm_order(sql)
-			bot.send_message(call.message.chat.id, config.ORDER_CONFIRMED_MESSAGE ,parse_mode='html')
-			bot.edit_message_text(chat_id=call.message.chat.id, 
-				message_id=config.BOT_ORDER_MESSAGE.message_id, 
-				text=config.ORDER_MESSAGE(
-					cart_price=config.USER_ORDER.get_cart_price(),
-					products_in_cart=config.USER_ORDER.cart
-					),
-				reply_markup=None,
-				parse_mode='html'
-				)
+			if config.USER_ORDER.confirm_order(sql,database=db)!='ERROR - NOT ENOUGH MONEY':
+				bot.send_message(call.message.chat.id, config.ORDER_CONFIRMED_MESSAGE ,parse_mode='html')
+				bot.edit_message_text(chat_id=call.message.chat.id, 
+					message_id=config.BOT_ORDER_MESSAGE.message_id, 
+					text=config.ORDER_MESSAGE(
+						cart_price=config.USER_ORDER.get_cart_price(),
+						products_in_cart=config.USER_ORDER.cart
+						),
+					reply_markup=None,
+					parse_mode='html'
+					)
+			else:
+				bot.send_message(
+					call.message.chat.id, 
+					config.ORDER_NOT_ENOUGH_MONEY(
+						db_manipulator.get_user_by_id(call.from_user.id, sql)[4],
+						config.USER_ORDER.get_cart_price()
+						),
+					parse_mode='html'
+					)
 			config.USER_ORDER.clear_cart()
 		#------------------------------------------------
 	#except Exception as e:
