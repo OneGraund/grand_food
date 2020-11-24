@@ -1,1 +1,1 @@
-TOKEN = '1436100647:AAH5IYyT5sw9JRQYrUo7WoLG70mOECDiQGg' #My token
+#Put token here
