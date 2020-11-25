@@ -11,6 +11,9 @@ from telebot import types
 import db_manipulator
 #---------------------------
 
+#-------------------------------------------------------------
+print("Grand_food has started work ...")
+#-------------------------------------------------------------
 
 #----------------START-UP-----------
 bot = telebot.TeleBot(secret_token.TOKEN)
@@ -37,25 +40,28 @@ def register_user(message):
 def welcome(message):
 	delete_shop_UI(message.chat.id)
 	config.LAST_SENT_MESSAGE=None
-	#--------------Greetings-sticker-----------------------
-	sti=open(config.GREETINGS_STICKER, 'rb')
-	bot.send_sticker(message.chat.id, sti)
-	#------------------------------------------------------
-	#----------------Register-user-------------------------
-	register_user(message)
-	#------------------------------------------------------
 	#-----------------keyboard------------------------------
 	markup= types.ReplyKeyboardMarkup(resize_keyboard=True)
 	item1 = types.KeyboardButton(config.ITEM1)
 	item2 = types.KeyboardButton(config.ITEM2)
 	markup.add(item1, item2)
 	#-------------------------------------------------------
+	#--------------Greetings-sticker-----------------------
+	sti=open(config.GREETINGS_STICKER, 'rb')
+	bot.send_sticker(message.chat.id, sti,reply_markup=markup)
+	#------------------------------------------------------
+	#----------------Register-user-------------------------
+	register_user(message)
+	#------------------------------------------------------
+	markup2 = types.InlineKeyboardMarkup(row_width=1)
+	item1=types.InlineKeyboardButton("Поддержка", url='https://t.me/OneGraund')
+	markup2.add(item1)
 	#-----------------Hello-Message-------------------------
 	bot.send_message(message.chat.id, 
 		f'''Привет, {message.from_user.first_name}!\n 
 			Это - <b>{bot.get_me().first_name}</b>!''',
 		parse_mode='html',
-		reply_markup=markup)
+		reply_markup=markup2)
 	#-------------------------------------------------------
 #-----------------------------------------------------------
 
