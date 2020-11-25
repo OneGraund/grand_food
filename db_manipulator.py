@@ -38,24 +38,17 @@ class User(object):
 		print(f"User - {self.first_name} has been written to db")
 
 	def reload_data_in_class(self, sql_cursor, db):
-		first_name=self.first_name
-		second_name=self.second_name
-		username=self.username
 		user=get_user_by_id(self.user_id, sql_cursor)
-		if user[1]==first_name and user[2]==second_name and user[3]==username:
+		if user[1]==self.first_name and user[2]==self.second_name and user[3]==self.username:
 			print("User data is the same... Continuing...")
 			return None
 		else:
-			print(f"Update db data request: \nOld name - {self.first_name};\t New name - {first_name}\n"
-				f"Old second name - {self.second_name}\t New second name - {second_name}\n"
-				f"Old username - {self.username}\t New username - {username}\n"
+			print(f"Update db data request: \nOld name - {user[1]};\t New name - {self.first_name}\n"
+				f"Old second name - {user[2]}\t New second name - {self.second_name}\n"
+				f"Old username - {user[3]}\t New username - {self.username}\n"
 				f"ID - {self.user_id};")
-			sql_cursor.execute(f"UPDATE users SET first_name = {first_name} WHERE user_id = {self.user_id}")
-			sql_cursor.execute(f"UPDATE users SET second_name = {second_name} WHERE user_id = {self.user_id}")
-			sql_cursor.execute(f"UPDATE users SET username = {username} WHERE user_id = {self.user_id}")
-			self.first_name=first_name
-			self.second_name=second_name
-			self.username=username
+			sql_cursor.execute("UPDATE users SET first_name= ? ,second_name= ? , username = ? WHERE user_id= ?", (self.first_name, self.second_name, self.username, self.user_id))
+
 			db.commit()
 
 def get_user_cash_by_id(idForScan, sql):
