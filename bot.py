@@ -23,10 +23,12 @@ def register_user(message):
 	sql= db.cursor()
 	if db_manipulator.get_user_by_id(int(message.from_user.id), sql_cursor=sql) == None:
 		#print(f"User - {message.from_user.id} is not in DB. Adding...")
-		db_manipulator.User(message.from_user.id,message.from_user.first_name, 
+		config.USER_IN_CLASS=db_manipulator.User(message.from_user.id,message.from_user.first_name, 
 			message.from_user.last_name, message.from_user.username, 0).write_user_to_db(sql_cursor=sql, db=db)
 	else:
 		#print(f"User - {message.from_user.id} is in DB. Continuing...")
+		config.USER_IN_CLASS=db_manipulator.User(message.from_user.id,message.from_user.first_name, 
+			message.from_user.last_name, message.from_user.username, 0)
 		return
 #---------------------------------------------------------
 
@@ -264,9 +266,14 @@ def callback_bank_inline_query(call):
 			#print("CALLBACK ACTION: Show amount of money")
 			db = sqlite3.connect('server.db')
 			sql= db.cursor()
-			bot.send_message(call.message.chat.id, config.SHOW_USER_DATA(
-				user=db_manipulator.get_user_by_id(call.from_user.id, sql)
-				),
+			bot.send_message(
+				call.message.chat.id, 
+				config.SHOW_USER_DATA(
+						user=db_manipulator.get_user_by_id(call.from_user.id, sql)
+					),
+				reply_markup=types.InlineKeyboardMarkup(row_width=1).add(
+							types.InlineKeyboardButton("🔄бновить данные🔄", callback_data='reload_profile')
+						),
 			parse_mode='html')
 			bot.edit_message_text(chat_id=call.message.chat.id, 
 				message_id=call.message.message_id, text=config.bank_message(call.from_user.id),
@@ -274,6 +281,42 @@ def callback_bank_inline_query(call):
 			bot.answer_callback_query(callback_query_id=call.id, 
 				show_alert=False,
 				text="Вы выбрали отображение средств")
+		#--------------------------------------------------
+		#----------------RELOAD-USER-INFORMATION-----------
+		elif call.data == 'reload_profile':
+			config.LAST_SENT_MESSAGE=None
+			#user_id, first_name, second_name, username, cash
+			db = sqlite3.connect('server.db')
+			sql= db.cursor()
+			config.USER_IN_CLASS=db_manipulator.User(
+					call.from_user.id,
+					call.from_user.first_name, 
+					call.from_user.last_name, 
+					call.from_user.username, 
+					db_manipulator.get_user_cash_by_id(
+							idForScan=call.from_user.id, 
+							sql=sql
+						)
+				)
+			res=config.USER_IN_CLASS.reload_data_in_class(
+					first_name=call.from_user.first_name, 
+					second_name=call.from_user.last_name, 
+					username=call.from_user.username,
+					sql_cursor=sql, 
+					db=db
+				)
+			config.USER_IN_CLASS.write_user_to_db(
+					sql_cursor=sql, 
+					db=db
+				)
+			bot.edit_message_text(
+					chat_id=call.message.chat.id,
+					message_id=call.message.message_id,
+					text=config.SHOW_USER_DATA(
+						user=db_manipulator.get_user_by_id(call.from_user.id, sql)
+					),
+					parse_mode='html'
+				)
 		#--------------------------------------------------
 		#-------------------Product-staff------------------		
 		elif call.data == 'less':
@@ -295,15 +338,30 @@ def callback_bank_inline_query(call):
 			db = sqlite3.connect('server.db')
 			sql= db.cursor()
 			if config.USER_ORDER.confirm_order(sql,database=db)!='ERROR - NOT ENOUGH MONEY':
-				bot.send_message(call.message.chat.id, config.ORDER_CONFIRMED_MESSAGE(cart=config.USER_ORDER.cart, user_money=db_manipulator.get_user_cash_by_id(call.message.from_user.id, sql)) ,parse_mode='html')
-				bot.edit_message_text(chat_id=call.message.chat.id, 
-					message_id=config.BOT_ORDER_MESSAGE.message_id, 
-					text=config.ORDER_MESSAGE(
-						cart_price=config.USER_ORDER.get_cart_price(),
-						products_in_cart=config.USER_ORDER.cart
-						),
-					reply_markup=None,
-					parse_mode='html'
+				if config.USER_ORDER.get_cart_price()!=0:
+					bot.send_message(call.message.chat.id, 
+						config.ORDER_CONFIRMED_MESSAGE(
+							cart=config.USER_ORDER.cart, 
+							user_money=db_manipulator.get_user_cash_by_id(call.from_user.id, sql)
+							),
+						parse_mode='html'
+					)
+					bot.edit_message_text(chat_id=call.message.chat.id, 
+						message_id=config.BOT_ORDER_MESSAGE.message_id, 
+						text=config.ORDER_MESSAGE(
+							cart_price=config.USER_ORDER.get_cart_price(),
+							products_in_cart=config.USER_ORDER.cart
+							),
+						reply_markup=None,
+						parse_mode='html'
+						)
+					delete_shop_UI(call.message.chat.id)
+					config.USER_ORDER.clear_cart()
+				else:
+					bot.answer_callback_query(
+						callback_query_id=call.id, 
+						show_alert=True,
+						text="Твоя корзина пустая!"
 					)
 			else:
 				bot.send_message(
@@ -314,8 +372,8 @@ def callback_bank_inline_query(call):
 						),
 					parse_mode='html'
 					)
-			delete_shop_UI(call.message.chat.id)
-			config.USER_ORDER.clear_cart()
+				delete_shop_UI(call.message.chat.id)
+				config.USER_ORDER.clear_cart()
 		#------------------------------------------------
 	#except Exception as e:
 	#	print(repr(e))

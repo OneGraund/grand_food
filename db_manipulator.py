@@ -24,6 +24,23 @@ class User(object):
 		sql_cursor.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?)", (self.user_id, 
 			self.first_name, self.second_name, self.username, self.cash))
 		db.commit()
+	def reload_data_in_class(self, first_name, second_name, username, sql_cursor, db):
+		user=get_user_by_id(self.user_id, sql_cursor)
+		if user[1]==first_name and user[2]==second_name and user[3]==username:
+			print("User data is the same... Continuing...")
+			return None
+		else:
+			print(f"Update db data request: \nOld name - {self.first_name};\t New name - {first_name}\n"
+				f"Old second name - {self.second_name}\t New second name - {second_name}\n"
+				f"Old username - {self.username}\t New username - {username}\n"
+				f"ID - {self.user_id};")
+			sql_cursor.execute(f"UPDATE users SET first_name = {first_name} WHERE user_id = {self.user_id}")
+			sql_cursor.execute(f"UPDATE users SET second_name = {second_name} WHERE user_id = {self.user_id}")
+			sql_cursor.execute(f"UPDATE users SET username = {username} WHERE user_id = {self.user_id}")
+			self.first_name=first_name
+			self.second_name=second_name
+			self.username=username
+			db.commit()
 
 def get_user_cash_by_id(idForScan, sql):
 	return int(get_user_by_id(idForScan, sql)[4])

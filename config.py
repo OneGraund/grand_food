@@ -89,7 +89,7 @@ def ORDER_CONFIRMED_MESSAGE(cart, user_money):
 	for elem in cart:
 		if elem[1]!=0:
 			string = string + f'{elem[0][1]} - {elem[1]} шт.\n'
-	string = f'{string}Остаток - <b>💵{user_money} грандиков💵</b>'
+	string = f'{string}\nОстаток - <b>💵{user_money} грандиков💵</b>'
 	return string
 
 
@@ -97,3 +97,6 @@ ORDER_CANCELLED_MESSAGE='Заказ отменён, корзина очищен�
 
 def ORDER_NOT_ENOUGH_MONEY(user_cash_amount, cart_cash_amount):
 	return f'<b>Заказ не может быть оплачен.</b>\nК сожалению, у тебя на счету <b>💵{user_cash_amount} грандиков💵</b>.\n<b>Стоимсть заказа - 💵{cart_cash_amount} грандиков💵</b>'
+
+
+USER_IN_CLASS=None
