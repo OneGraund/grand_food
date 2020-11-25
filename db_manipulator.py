@@ -1,5 +1,6 @@
 import sqlite3
 import products
+import config
 
 db = sqlite3.connect('server.db')
 sql= db.cursor()
@@ -9,22 +10,37 @@ sql.execute('''CREATE TABLE IF NOT EXISTS users (
 	first_name TEXT,
 	second_name TEXT,
 	username TEXT,
-	cash BIGINT)''')
+	cash BIGINT,
+	grade INT,
+	position TEXT,
+	job TEXT,
+	salary INT)''')
 
 db.commit()
 
 class User(object):
+	grade=0
+	position='student' #должность в лицейской асамблее
+	job='unemployed' 	  #работа в лицее
+	salary = 0 #зарпалата основаная на работе
+
 	def __init__(self, user_id, first_name, second_name, username, cash):
 		self.user_id = user_id
 		self.first_name = first_name
 		self.second_name =second_name
 		self.username = username
 		self.cash = cash
+
 	def write_user_to_db(self, sql_cursor, db):
-		sql_cursor.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?)", (self.user_id, 
-			self.first_name, self.second_name, self.username, self.cash))
+		sql_cursor.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (self.user_id, 
+			self.first_name, self.second_name, self.username, self.cash, self.grade, self.position, self.job, self.salary))
 		db.commit()
-	def reload_data_in_class(self, first_name, second_name, username, sql_cursor, db):
+		print(f"User - {self.first_name} has been written to db")
+
+	def reload_data_in_class(self, sql_cursor, db):
+		first_name=self.first_name
+		second_name=self.second_name
+		username=self.username
 		user=get_user_by_id(self.user_id, sql_cursor)
 		if user[1]==first_name and user[2]==second_name and user[3]==username:
 			print("User data is the same... Continuing...")
@@ -116,18 +132,21 @@ class Order(object):
 		return price
 
 	def confirm_order(self,sql_order,database):
-		if get_user_cash_by_id(sql=sql_order,idForScan=self.user_id)>=self.get_cart_price(): #ERROR RIGHT HERE
-			user_info=get_user_by_id(idFromDB=self.user_id, sql_cursor=sql_order)
-			self.status='confirmed'
-			print("-"*50)
-			print(f"""Order was confirmed by:
-ID - {self.user_id}\nName - {user_info[1]}\nLast name - {user_info[2]}
-Username - {user_info[3]}\n{"-  "*17}\nPlease, start packing this order:""")
-			for elem in self.cart:
-				if elem[1]!=0:
-					print(f"{elem[0][1]} - quantity:{elem[1]} ")
-			sql_order.execute(f"UPDATE users SET cash = {user_info[4]-self.get_cart_price()} WHERE user_id = {self.user_id}")
-			database.commit()
+		if get_user_cash_by_id(sql=sql_order,idForScan=self.user_id)>=self.get_cart_price():# and config.USER_ORDER.get_cart_price()!=0: #ERROR RIGHT HERE
+			if self.get_cart_price()!=0:
+				user_info=get_user_by_id(idFromDB=self.user_id, sql_cursor=sql_order)
+				self.status='confirmed'
+				print("-"*50)
+				print(f"""Order was confirmed by:
+	ID - {self.user_id}\nName - {user_info[1]}\nLast name - {user_info[2]}
+	Username - {user_info[3]}\n{"-  "*17}\nPlease, start packing this order:""")
+				for elem in self.cart:
+					if elem[1]!=0:
+						print(f"{elem[0][1]} - quantity:{elem[1]} ")
+				sql_order.execute(f"UPDATE users SET cash = {user_info[4]-self.get_cart_price()} WHERE user_id = {self.user_id}")
+				database.commit()
+			else:
+				return
 		else:
 			return 'ERROR - NOT ENOUGH MONEY'
 

@@ -299,16 +299,10 @@ def callback_bank_inline_query(call):
 						)
 				)
 			res=config.USER_IN_CLASS.reload_data_in_class(
-					first_name=call.from_user.first_name, 
-					second_name=call.from_user.last_name, 
-					username=call.from_user.username,
 					sql_cursor=sql, 
 					db=db
 				)
-			config.USER_IN_CLASS.write_user_to_db(
-					sql_cursor=sql, 
-					db=db
-				)
+			
 			bot.edit_message_text(
 					chat_id=call.message.chat.id,
 					message_id=call.message.message_id,
