@@ -277,9 +277,8 @@ def callback_bank_inline_query(call):
 				config.SHOW_USER_DATA(
 						user=db_manipulator.get_user_by_id(call.from_user.id, sql)
 					),
-				reply_markup=types.InlineKeyboardMarkup(row_width=2).add(
-							types.InlineKeyboardButton("🔄Обновить данные🔄", callback_data='reload_profile'),
-							types.InlineKeyboardButton("✅Закончить регистрацию✅", callback_data='finish_registration')
+				reply_markup=types.InlineKeyboardMarkup(row_width=1).add(
+							types.InlineKeyboardButton("🔄Обновить данные🔄", callback_data='reload_profile')
 						),
 			parse_mode='html')
 			bot.edit_message_text(chat_id=call.message.chat.id, 
@@ -319,20 +318,6 @@ def callback_bank_inline_query(call):
 					parse_mode='html'
 				)
 		#--------------------------------------------------
-		#---------------Finish-user-registration-----------
-		elif call.data == 'finish_registration':
-			db = sqlite3.connect('server.db')
-			sql= db.cursor()
-			bot.edit_message_text(chat_id=call.message.chat.id, 
-				message_id=call.message.message_id, 
-				text=config.SHOW_USER_DATA(
-						user=db_manipulator.get_user_by_id(call.from_user.id, sql)
-					),
-				reply_markup=types.InlineKeyboardMarkup(row_width=1).add(
-							types.InlineKeyboardButton("🔄Обновить данные🔄", callback_data='reload_profile'),
-						),
-			parse_mode='html')
-			bot.send_message(call.message.chat.id, text='User registration request')
 		#-------------------Product-staff------------------		
 		elif call.data == 'less':
 			inline_keyboard_products_action('less')

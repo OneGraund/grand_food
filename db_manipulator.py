@@ -48,8 +48,10 @@ class User(object):
 				f"Old username - {user[3]}\t New username - {self.username}\n"
 				f"ID - {self.user_id};")
 			sql_cursor.execute("UPDATE users SET first_name= ? ,second_name= ? , username = ? WHERE user_id= ?", (self.first_name, self.second_name, self.username, self.user_id))
-
 			db.commit()
+
+	def finish_registration(self):
+		pass
 
 def get_user_cash_by_id(idForScan, sql):
 	return int(get_user_by_id(idForScan, sql)[4])
