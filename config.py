@@ -1,7 +1,8 @@
 import db_manipulator
 import sqlite3
 
-TOKEN = '1436100647:AAH5IYyT5sw9JRQYrUo7WoLG70mOECDiQGg' #My token
+DEBUG = 1
+
 GREETINGS_STICKER = 'static/welcome.webp'
 #-------REPLY-KEYBOARD--------
 ITEM1 = "🛒 Магазин 🛒"
@@ -56,7 +57,7 @@ NOT_CORRECT_CASH = "К сожалению это неправильный фор
 def SUCCESSFULL_TRANSACTION(user_id,cash_amount,user_cash):
 	db = sqlite3.connect('server.db')
 	sql= db.cursor()
-	user = db_manipulator.get_user_by_id(sql_cursor=sql,idFromDB=int(user_id))
+	user = db_manipulator.get_user_by_id(sql_cursor=sql, id_of_user=int(user_id))
 	if user[1]!=None:
 		name=user[1]
 	elif user[2]!=None:
@@ -69,7 +70,15 @@ def SUCCESSFULL_TRANSACTION(user_id,cash_amount,user_cash):
 	return (f"<b>Транзакция успешна!</b>\n<b>{name}</b> получил/а свои <b>💵{cash_amount} грандиков💵</b>\n<b>Остаток на вашем счету - 💵{user_cash} грандиков💵</b>")
 
 def SHOW_USER_DATA(user):
-	return(f"<b>👤Информация о пользователе👤:</b>\n<b>ID</b> - {user[0]}\n<b>Имя</b> - {user[1]}\n<b>Фамилия</b> - {user[2]}\n<b>Никнейм</b> - {user[3]}\n<b>Грандиков</b> - {user[4]}")
+	print(f"SHOW_USER_DATA request...\nOperating user: \n{user}\n{'_'*30}")
+	if user[5] == 0:
+		grade = 'не добавлен'
+	if user[6]=='student':
+		position='нет'
+	if user[7]=='unemployed':
+		job='безработный'
+	return(f"<b>👤Информация о пользователе👤:</b>\n\n<b>ID</b> - {user[0]}\n<b>Имя</b> - {user[1]}\n<b>Фамилия</b> - {user[2]}\n<b>Никнейм</b> - {user[3]}\n<b>Грандиков</b> - {user[4]}\n"
+		   f"\nКласс - {grade}\nДолжность - {position}\nЗарплата - {user[8]}\nРабота - {job}")
 
 USER_ORDER=None
 
@@ -89,11 +98,14 @@ def ORDER_CONFIRMED_MESSAGE(cart, user_money):
 	for elem in cart:
 		if elem[1]!=0:
 			string = string + f'{elem[0][1]} - {elem[1]} шт.\n'
-	string = f'{string}Остаток - <b>💵{user_money} грандиков💵</b>'
+	string = f'{string}\nОстаток - <b>💵{user_money} грандиков💵</b>'
 	return string
 
 
 ORDER_CANCELLED_MESSAGE='Заказ отменён, корзина очищена'
 
 def ORDER_NOT_ENOUGH_MONEY(user_cash_amount, cart_cash_amount):
-	return f'<b>Заказ не может быть оплачен.</b>\nК сожалению, у тебя на счету <b>💵{user_cash_amount} грандиков💵</b>.\n<b>Стоимсть заказа - 💵{cart_cash_amount} грандиков💵</b>'
+	return f'<b>Заказ не может быть оплачен.</b>\nК сожалению, у тебя на счету <b>💵{user_cash_amount} грандиков💵</b>.\n<b>Стоимость заказа - 💵{cart_cash_amount} грандиков💵</b>'
+
+
+USER_IN_CLASS=None
