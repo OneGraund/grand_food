@@ -1,7 +1,8 @@
 import db_manipulator
 import sqlite3
 
-TOKEN = '1436100647:AAH5IYyT5sw9JRQYrUo7WoLG70mOECDiQGg' #My token
+DEBUG = 1
+
 GREETINGS_STICKER = 'static/welcome.webp'
 #-------REPLY-KEYBOARD--------
 ITEM1 = "🛒 Магазин 🛒"
@@ -56,7 +57,7 @@ NOT_CORRECT_CASH = "К сожалению это неправильный фор
 def SUCCESSFULL_TRANSACTION(user_id,cash_amount,user_cash):
 	db = sqlite3.connect('server.db')
 	sql= db.cursor()
-	user = db_manipulator.get_user_by_id(sql_cursor=sql,idFromDB=int(user_id))
+	user = db_manipulator.get_user_by_id(sql_cursor=sql, id_of_user=int(user_id))
 	if user[1]!=None:
 		name=user[1]
 	elif user[2]!=None:
