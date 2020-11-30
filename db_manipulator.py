@@ -68,7 +68,7 @@ def get_users_from_db():
     if config.DEBUG:
         print("Getting users from db ...")
         for elem in lines:
-            print(f"{elem[1]}-{type(elem)}")
+            print(f"Name - {elem[1]};\nID - {elem[0]}\n{'_ '*20}")
 
 
 def get_user_by_id(id_of_user, sql_cursor):
