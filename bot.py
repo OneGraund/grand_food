@@ -209,7 +209,7 @@ def text_message_func(message):
                             print("User has enough money, continuing...")
                         # This one had in do_money_transfer in id1 - message.chat.id don't know if it is correct or not
                         res = db_manipulator.do_money_transfer(db_money_transfer=db, sql_money_transfer=sql, id1=message.from_user.id,
-                                                               id2=int(a[(a.find('ID') + 5): (a.find('ID') + 14)]),
+                                                               id2=int(a[(a.find('ID') + 5): (a.find('ID') + 15)]),
                                                                cash=int(message.text))
                         if res == 'Success':
                             if config.DEBUG:
