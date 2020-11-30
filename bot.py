@@ -217,7 +217,7 @@ def text_message_func(message):
                                       f"Receiver - {int(a[(a.find('ID') + 5): (a.find('ID') + 14)])}")
 
                             bot.send_message(message.chat.id, config.SUCCESSFULL_TRANSACTION(
-                                user_id=int(a[(a.find('ID') + 5): (a.find('ID') + 14)]),
+                                user_id=int(a[(a.find('ID') + 5): (a.find('ID') + 15)]),
                                 cash_amount=int(message.text),
                                 user_cash=db_manipulator.get_user_cash_by_id(int(message.from_user.id), sql)),
                                              parse_mode='html'

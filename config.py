@@ -58,6 +58,8 @@ def SUCCESSFULL_TRANSACTION(user_id,cash_amount,user_cash):
 	db = sqlite3.connect('server.db')
 	sql= db.cursor()
 	user = db_manipulator.get_user_by_id(sql_cursor=sql, id_of_user=int(user_id))
+	if DEBUG:
+		print(f"I am trying to find best name for second user!\nOperating - {user}")
 	if user[1]!=None:
 		name=user[1]
 	elif user[2]!=None:
