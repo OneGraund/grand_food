@@ -241,7 +241,7 @@ def text_message_func(message):
             elif config.LAST_SENT_MESSAGE.text == config.IN_MONEY_TRANSACTION:
                 if config.DEBUG:
                     print("Input analyzer - ID ...")
-                if len(str(message.text)) == 9 and check_if_int(message.text):
+                if (len(str(message.text)) == 9 or len(str(message.text)) == 10)  and check_if_int(message.text):
                     db = sqlite3.connect('server.db')
                     sql = db.cursor()
                     user_in_db = db_manipulator.get_user_by_id(int(message.text), sql)
