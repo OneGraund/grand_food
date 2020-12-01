@@ -55,8 +55,8 @@ def welcome(message):
     markup.add(item1, item2)
     # -------------------------------------------------------
     # --------------Greetings-sticker-----------------------
-    sti = open(config.GREETINGS_STICKER, 'rb')
-    bot.send_sticker(message.chat.id, sti, reply_markup=markup)
+    #sti = open(config.GREETINGS_STICKER, 'rb')
+    #bot.send_sticker(message.chat.id, sti,  reply_markup=markup)
     # ------------------------------------------------------
     # ----------------Register-user-------------------------
     register_user(message)
